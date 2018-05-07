@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+<edges>
+	<edge>
+		<id>0</id>
+		<range>10</range>
+		<location_x>0</location_x>
+		<location_y>0</location_y>
+		<mips>4000</mips>
+		<ram>2000</ram>
+		<density>30</density>
+		<speed_limit>30</speed_limit>
+		<jam_density>40</jam_density>
+		<vms>
+			<num_cores vmm="1">5</num_cores>
+			<num_cores vmm="2">2</num_cores>
+		</vms>
+	</edge>
+	<edge>
+		<id>1</id>
+		<range>10</range>
+		<location_x>0</location_x>
+		<location_y>1</location_y>
+		<mips>4000</mips>
+		<ram>2000</ram>
+		<density>30</density>
+		<speed_limit>30</speed_limit>
+		<jam_density>40</jam_density>
+		<vms>
+			<num_cores vmm="1">5</num_cores>
+			<num_cores vmm="2">2</num_cores>
+		</vms>
+	</edge>
+	<edge>
+		<id>2</id>
+		<range>10</range>
+		<location_x>1</location_x>
+		<location_y>0</location_y>
+		<mips>4000</mips>
+		<ram>2000</ram>
+		<density>30</density>
+		<speed_limit>30</speed_limit>
+		<jam_density>40</jam_density>
+		<vms>
+			<num_cores vmm="1">5</num_cores>
+			<num_cores vmm="2">2</num_cores>
+		</vms>
+	</edge>
+	<edge>
+		<id>3</id>
+		<range>10</range>
+		<location_x>1</location_x>
+		<location_y>1</location_y>
+		<mips>4000</mips>
+		<ram>2000</ram>
+		<density>30</density>
+		<speed_limit>30</speed_limit>
+		<jam_density>40</jam_density>
+		<vms>
+			<num_cores vmm="1">5</num_cores>
+			<num_cores vmm="2">2</num_cores>
+		</vms>
+	</edge>
+</edges>

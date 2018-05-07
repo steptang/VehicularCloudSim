@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<vehicles>
+	<vehicle>
+		<initial_speed>10</initial_speed>
+		<client_application>0</client_application>
+		<path>
+			<edge>0</edge>
+			<edge>1</edge>
+		</path>
+	</vehicle>
+	<vehicle>
+		<initial_speed>10</initial_speed>
+		<client_application>1</client_application>
+		<path>
+			<edge>1</edge>
+			<edge>0</edge>
+		</path>
+	</vehicle>
+	<vehicle>
+		<initial_speed>10</initial_speed>
+		<client_application>2</client_application>
+		<path>
+			<edge>0</edge>
+			<edge>1</edge>
+			<edge>2</edge>
+		</path>
+	</vehicle>
+</vehicles>

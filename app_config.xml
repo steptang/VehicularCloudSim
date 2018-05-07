@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<applications>
+	<application name="GPS_APP">
+		<id>0</id>
+		<poisson_mean>5</poisson_mean>
+		<avg_data_upload>1500</avg_data_upload>
+		<avg_data_download>25</avg_data_download>
+		<avg_task_length>2000</avg_task_length>
+		<required_num_cores>1</required_num_cores>
+		<required_memory>20</required_memory>
+		<task_type>0</task_type>
+		<edges>
+			<edge>0</edge>
+		</edges>
+	</application>
+	<application name="VIDEO_APP">
+		<id>1</id>
+		<poisson_mean>5</poisson_mean>
+		<avg_data_upload>1500</avg_data_upload>
+		<avg_data_download>25</avg_data_download>
+		<avg_task_length>2000</avg_task_length>
+		<required_num_cores>1</required_num_cores>
+		<required_memory>20</required_memory>
+		<task_type>0</task_type>
+		<edges>
+			<edge>1</edge>
+		</edges>
+	</application>
+	<application name="WEATHER_APP">
+		<id>2</id>
+		<poisson_mean>5</poisson_mean>
+		<avg_data_upload>1500</avg_data_upload>
+		<avg_data_download>25</avg_data_download>
+		<avg_task_length>2000</avg_task_length>
+		<required_num_cores>1</required_num_cores>
+		<required_memory>20</required_memory>
+		<task_type>1</task_type>
+		<edges>
+			<edge>2</edge>
+		</edges>
+	</application>
+</applications>

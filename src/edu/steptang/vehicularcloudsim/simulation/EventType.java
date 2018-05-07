@@ -1,5 +1,5 @@
 package edu.steptang.vehicularcloudsim.simulation;
 
 public enum EventType {
-    SUBMIT_TASK, RECIEVE_TASK, EXECUTE_TASK, FINISH_TASK
+    START_VEHICLE, ENTER_EDGE, LEAVE_EDGE, RECIEVE_TASK, EXECUTE_TASK, FINISH_TASK
 }

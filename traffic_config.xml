@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<traffic_models>
+	<traffic_model>
+		<speed_limit>30</speed_limit>
+		<range>1000</range>
+		<jam_density>40</jam_density>
+		<last_edge>0</last_edge>
+		<next_edge>1</next_edge>
+	</traffic_model>
+	<traffic_model>
+		<speed_limit>30</speed_limit>
+		<range>1000</range>
+		<jam_density>40</jam_density>
+		<last_edge>1</last_edge>
+		<next_edge>2</next_edge>
+	</traffic_model>
+	<traffic_model>
+		<speed_limit>30</speed_limit>
+		<range>1000</range>
+		<jam_density>40</jam_density>
+		<last_edge>1</last_edge>
+		<next_edge>0</next_edge>
+	</traffic_model>
+</edges>

@@ -1,7 +1,8 @@
 package edu.steptang.vehicularcloudsim.entities;
 
+import java.util.HashMap;
+
 import edu.steptang.vehicularcloudsim.simulation.MainModel;
-import edu.steptang.vehicularcloudsim.simulation.TaskType;
 
 public class VehicularTask {
     private int taskId;
@@ -10,26 +11,33 @@ public class VehicularTask {
     private double data_upload;
     private double data_download;
     private double task_length; //num instructions
-    private double speed; //temporary
-    private TaskType taskType;
-    private String vmType; //to be set by simulation
+    private Vehicle vehicle;
     private double deadline; //to be set by simulation
     private boolean serviced; //to be set by simulation
     private double waitTime; //to be set by simulation
     private double slack; //to be set by simulation
+    private HashMap<String, Integer> usedVMs; //map of cores from vms being used by this task, to be set by simulation
     private Edge edge;
     
-    public VehicularTask(int taskId, ClientApplication clientApplication, double submitTime, double speed, Edge edge, TaskType taskType) {
+    public VehicularTask(int taskId, ClientApplication clientApplication, double submitTime, Vehicle vehicle, Edge edge) {
         this.setTaskId(taskId);
         this.setClientApplication(clientApplication);
         this.setSubmitTime(submitTime);
-        this.speed = speed;
+        this.vehicle = vehicle;
         this.setEdge(edge);
-        this.setTaskType(taskType);
         data_upload = clientApplication.getExpRngList()[0].sample();
         data_download = clientApplication.getExpRngList()[1].sample();
         task_length = clientApplication.getExpRngList()[2].sample();
+        this.usedVMs = new HashMap<String, Integer>();
         MainModel.addTask(this);
+    }
+    
+    public void updateUsedVMs(String vm, Integer numCores) {
+        usedVMs.put(vm, numCores);
+    }
+    
+    public HashMap<String, Integer> getUsedVMs(){
+        return usedVMs;
     }
 
     public ClientApplication getClientApplication() {
@@ -72,12 +80,12 @@ public class VehicularTask {
         this.task_length = task_length;
     }
     
-    public double getSpeed() {
-        return speed;
+    public Vehicle getVehicle() {
+        return vehicle;
     }
     
-    public void setSpeet(double speed) {
-        this.speed = speed;
+    public void setVehicle(Vehicle vehicle) {
+        this.vehicle = vehicle;
     }
 
     public double getDeadline() {
@@ -145,22 +153,6 @@ public class VehicularTask {
 
     public void setSlack(double slack) {
         this.slack = slack;
-    }
-
-    public String getVmType() {
-        return vmType;
-    }
-
-    public void setVmType(String vmType) {
-        this.vmType = vmType;
-    }
-
-    public TaskType getTaskType() {
-        return taskType;
-    }
-
-    public void setTaskType(TaskType taskType) {
-        this.taskType = taskType;
     }
     
 }

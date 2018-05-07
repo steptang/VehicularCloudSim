@@ -1,12 +1,8 @@
 package edu.steptang.vehicularcloudsim.simulation;
 
-import java.sql.Time;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TimerTask;
 import java.util.TreeMap;
-
-import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 
 import edu.steptang.vehicularcloudsim.entities.Edge;
 import edu.steptang.vehicularcloudsim.entities.VehicularTask;
@@ -34,7 +30,27 @@ public class Statistics {
         System.out.println("Total Simulation Drop Rate: " + totalDropRate * 100 + "%");
         System.out.println("Drop Rate Per Edge:");
         for (Edge edge: MainModel.getEdges()) {
-            System.out.println("Edge " + edge.getId() + ": " + edge.getDropCount()/edge.getTotalTasksRecieved() * 100 + "%");
+            if (edge.getTotalTasksRecieved() > 0) {
+                System.out.println("Edge " + edge.getId() + ": " + edge.getDropCount()/edge.getTotalTasksRecieved() * 100 + "%");
+            } else {
+                System.out.println("Edge " + edge.getId() + ": No Recieved Tasks");
+            }
+        }
+    }
+    
+    public static void outputWorstCasePercentageDrop() {
+        double worstCase = 0;
+        Edge worstEdge = null;
+        for (Edge edge: MainModel.getEdges()) {
+            if (edge.getDropCount()/edge.getTotalTasksRecieved() > worstCase) {
+                worstCase = edge.getDropCount()/edge.getTotalTasksRecieved() * 100;
+                worstEdge = edge;
+            }
+        }
+        if (worstEdge == null) {
+            System.out.println("Error: All drop rates are negative.");
+        } else {
+            System.out.println("Worst Case Drop Rate: " + worstCase + "% at Edge " + worstEdge.getId());
         }
     }
     
@@ -70,7 +86,7 @@ public class Statistics {
 
         for (Map.Entry<Double, Integer> entry : processorUtilization.entrySet())
         {
-            if (maxEntry == null || entry.getValue().compareTo(maxEntry.getValue()) < 0)
+            if (maxEntry == null || entry.getValue().compareTo(maxEntry.getValue()) > 0)
             {
                 maxEntry = entry;
             }

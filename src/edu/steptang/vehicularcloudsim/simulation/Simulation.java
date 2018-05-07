@@ -2,8 +2,6 @@ package edu.steptang.vehicularcloudsim.simulation;
 
 import java.util.PriorityQueue;
 
-import edu.steptang.vehicularcloudsim.load.LoadGenerator;
-
 //What advances time?
 //vehicle submitting a load
 //edge receive load and decide compute or queue
@@ -63,7 +61,7 @@ public class Simulation {
                 currTime = e.getStartTime();
                 e.execute();
             }
-            if (e == null && !LoadGenerator.generateTasks){
+            if (e == null && Event.getFinishedVehicles() == MainModel.getVehicles().size()){
                 finishSimulation();
                 break;
             }
@@ -75,6 +73,7 @@ public class Simulation {
         System.out.println("Simulation Finished");
         System.out.println("Statistics:");
         Statistics.outputPercentageDrop();
+        Statistics.outputWorstCasePercentageDrop();
         Statistics.outputWaitingTime();
         Statistics.outputSlackTime();
         Statistics.outputWorstCaseMemoryUtilization();

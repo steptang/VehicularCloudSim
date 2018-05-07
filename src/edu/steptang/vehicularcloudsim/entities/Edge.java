@@ -3,44 +3,74 @@ package edu.steptang.vehicularcloudsim.entities;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import edu.steptang.vehicularcloudsim.simulation.Event;
 import edu.steptang.vehicularcloudsim.simulation.EventType;
 import edu.steptang.vehicularcloudsim.simulation.MainModel;
 import edu.steptang.vehicularcloudsim.simulation.Simulation;
 import edu.steptang.vehicularcloudsim.simulation.TaskType;
+import edu.steptang.vehicularcloudsim.traffic.TrafficModel;
 
 public class Edge {
     private int id;
+    private double density;
+    private double speedLimit;
+    private double jamDensity;
+    private int numVehicles; //set by simulation
     private double range;
     private Location location;
     private LinkedList<VehicularTask> taskQueue;
     private HashMap<String, Integer> vms; //map from vm to core
+    private int cores;
     private double mips; //speed at which instructions are running, model as frequency, when a request comes from a vehicle
     //assume that if the application requires x amount of data on one vms, x/2 for 2 vms
     private double ram; //data needs to be stored
     //check that there is enough storage
-    private int numVehicles; //temporary
     private HashMap<String, Integer> vmsAvailable; //map from vm to available cores
+    private int coresAvailable;
     private double ramAvailable;
     private double dropCount; //to be set by simulation
     private double totalTasksRecieved; //to be set by simulation
     
-    public Edge(int id, double range, double locationx, double locationy, HashMap<String, Integer> vms, 
-            double mips, double ram, int numVehicles) {
+    public Edge(int id, double range, int locationx, int locationy, HashMap<String, Integer> vms, 
+            double mips, double ram, double density, double speedLimit, double jamDensity) {
         this.setId(id);
         this.range = range;
         this.location = new Location(locationx, locationy);
         this.taskQueue = new LinkedList<VehicularTask>();
         this.vms = vms;
+        int sum = 0;
+        for (Entry<String, Integer> entry : vms.entrySet()) {
+            sum += entry.getValue();
+        }
+        this.cores = sum;
         this.mips = mips;
         this.ram = ram;
-        this.numVehicles = numVehicles;
+        this.numVehicles = 0;
         this.vmsAvailable = vms;
         this.ramAvailable = ram;
+        this.coresAvailable = sum;
         this.dropCount = 0;
         this.totalTasksRecieved = 0;
+        this.density = density;
+        this.speedLimit = speedLimit;
+        this.jamDensity = jamDensity;
         MainModel.addEdges(this);
+    }
+    
+    public void incrNumVehicles() {
+        numVehicles += 1;
+        density = numVehicles/range;
+    }
+    
+    public void decrNumVehicles() {
+        numVehicles -= 1;
+        density = numVehicles/range;
+    }
+    
+    public double getOutputSpeed() {
+        return speedLimit *(1 - density/jamDensity);
     }
 
     public double getRange() {
@@ -112,15 +142,17 @@ public class Edge {
     }
     
     public void setTaskDeadline(VehicularTask task) {
-        task.setDeadline(task.getSubmitTime() + calculateDeadline(task.getSpeed()));
+//        System.out.println("Submit Time: " + task.getSubmitTime());
+//        System.out.println("Deadline: " + (task.getSubmitTime() + calculateDeadline(task.getVehicle().getSpeed())));
+        task.setDeadline(task.getSubmitTime() + calculateDeadline(task.getVehicle().getSpeed()));
     }
     
     public double calculateTimeNeededAppExecution(VehicularTask task) {
-      return task.getDataUpload() + (mips * task.getTaskLength()) + task.getDataDownload(); //num vms
+      return task.getDataUpload() + (task.getTaskLength()/task.getClientApplication().getRequiredNumCores()/mips) + task.getDataDownload(); //num vms
     }
     
     public double calculateTimeNeededDataRetrieval(VehicularTask task) {
-        return (mips * task.getTaskLength()) + task.getDataDownload(); //num vms
+        return (task.getTaskLength()/task.getClientApplication().getRequiredNumCores()/mips) + task.getDataDownload(); //num vms
       }
     
     public Boolean calculateComputationalCapacity(VehicularTask task) {
@@ -133,36 +165,42 @@ public class Edge {
             return false;
         }
         //check core and vm requirements
-        int numVms = task.getClientApplication().getRequiredNumCores();
-        boolean hasCore = false;
-        for(String core : task.getClientApplication().getCompatibleVms()) {
-            if(vmsAvailable.containsKey(core)) {
-                hasCore = true;
-                if(numVms < vmsAvailable.get(core)) {
-                    task.setVmType(core);
-                    return true;
-                }
-            }
-        }
-        if(hasCore) {
-            return false;
-        }else {
+        int numCores = task.getClientApplication().getRequiredNumCores();
+        if(numCores > cores) {
             return null;
+        } else if (numCores > coresAvailable) {
+            return false;
+        } else {
+            return true;
         }
     }
     
     public void executeTask(double startExecuteTime, VehicularTask task) {
         removeTask(task);
-        int numVmsAvailable = vmsAvailable.get(task.getVmType());
-        if(!vmsAvailable.containsKey(task.getVmType())) {
-            System.out.println("Impossible Error: Executing task without required core type");
+        int reqCores = task.getClientApplication().getRequiredNumCores();
+        for (Entry<String, Integer> entry : vmsAvailable.entrySet()) {
+            int availCores = entry.getValue();
+            if(reqCores >= availCores) {
+                task.updateUsedVMs(entry.getKey(), availCores);
+                reqCores = reqCores - availCores;
+                vmsAvailable.put(entry.getKey(), 0);
+                coresAvailable = coresAvailable - availCores;
+                if(reqCores < 1) {
+                    break;
+                }
+            } else { //vm can only run one application
+                task.updateUsedVMs(entry.getKey(), availCores);
+                vmsAvailable.put(entry.getKey(), 0);
+                coresAvailable = coresAvailable - availCores;
+                reqCores = 0;
+                break;
+            }
         }
-        vmsAvailable.put(task.getVmType(), numVmsAvailable-task.getClientApplication().getRequiredNumCores());
         ramAvailable = ramAvailable - task.getClientApplication().getRequiredMemory();
         double timeNeeded = 0;
-        if(task.getTaskType() == TaskType.APP_EXECUTION){
+        if(task.getClientApplication().getTaskType() == TaskType.APP_EXECUTION){
             timeNeeded = calculateTimeNeededAppExecution(task);
-        }else if(task.getTaskType() == TaskType.DATA_RETRIEVAL) {
+        }else if(task.getClientApplication().getTaskType() == TaskType.DATA_RETRIEVAL) {
             timeNeeded = calculateTimeNeededDataRetrieval(task);
         }
         Event event = new Event(startExecuteTime + timeNeeded, EventType.FINISH_TASK, this, task);
@@ -170,11 +208,12 @@ public class Edge {
     }
     
     public void finishTask(double startFinishTime, VehicularTask task) {
-        int numVmsAvailable = vmsAvailable.get(task.getVmType());
-        if(!vmsAvailable.containsKey(task.getVmType())) {
-            System.out.println("Impossible Error: Finishing task without required core type");
+        for (Entry<String, Integer> entry : task.getUsedVMs().entrySet()) {
+            int currCores = vmsAvailable.get(entry.getKey());
+            vmsAvailable.put(entry.getKey(), currCores + entry.getValue());
+            coresAvailable += entry.getValue();
+            task.getUsedVMs().put(entry.getKey(), 0);
         }
-        vmsAvailable.put(task.getVmType(), numVmsAvailable+task.getClientApplication().getRequiredNumCores());
         ramAvailable = ramAvailable + task.getClientApplication().getRequiredMemory();
         VehicularTask currTask = taskQueue.peek();
         if(currTask == null) {
@@ -221,5 +260,27 @@ public class Edge {
     
     public double getMemoryAvailable() {
         return ramAvailable;
+    }
+
+    public double getTimeInEdge(Vehicle vehicle) {
+        //System.out.println("Range: " + range);
+        //System.out.println("Speed: " + vehicle.getSpeed());
+        return range/vehicle.getSpeed(); //add density formula for speed to edges
+    }
+
+    public int getCoresAvailable() {
+        return coresAvailable;
+    }
+
+    public void setCoresAvailable(int coresAvailable) {
+        this.coresAvailable = coresAvailable;
+    }
+
+    public int getCores() {
+        return cores;
+    }
+
+    public void setCores(int cores) {
+        this.cores = cores;
     }
 }
